@@ -10,6 +10,7 @@ const int Y = 25;
 
 const int shooter = 500000;
 const int enemir = 75;
+const int eshooter = 50;
 
 bool init = false;
 
@@ -18,6 +19,12 @@ string e2 = "H";
 string e3 = "M";
 
 struct shoot{
+	int x; 
+	int y;
+	bool act;
+};
+
+struct eshoot{
 	int x; 
 	int y;
 	bool act;
@@ -38,10 +45,15 @@ shoot disp[shooter];
 int ns = 0;
 enemi enemis[enemir];
 int ne = 25;
+eshoot edisp[eshooter];
+int ens = eshooter;
 
 int denemi = 1;
 
 void inicio(){
+	cout << "Alumno: Pablo A Aguilar" << endl;
+	cout << "DNI: 42.165.351" << endl;
+	cout << " " << endl;
 	cout << "Acaba con las naves enemigas antes de que lleguen abajo" << endl;
 	cout << " " << endl;
 	cout << "Muevete con 'A' para ir a la izquierda, 'D' para ir a la derecha" << endl;
@@ -49,6 +61,7 @@ void inicio(){
 	cout << "Dispara con 'BARRA ESPACIADORA'" << endl;
 	cout << " " << endl;
 	cout << "Presiona 'P' para iniciar" << endl;
+	
 	
 	char tecla;
 	do{
@@ -82,6 +95,18 @@ void dibujos(){
 					}
 				}
 			}
+			if(!show){
+				for(int k=0; k<ens; k++){
+					if(edisp[k].act && edisp[k].x==j && edisp[k].y==i){
+						textcolor(RED);
+						cprintf("v");
+						textcolor(WHITE);
+						show = true;
+						break;
+					}
+				}
+			}
+			
 			if(!show){
 				for(int k=0; k<ne; k++){
 					if(enemis[k].act && enemis[k].x==j && enemis[k].y==i-2){
@@ -200,18 +225,39 @@ void dibujos(){
 					
 					for(int k=0; k<ne; k++){
 						if(enemis[k].act && enemis[k].y >= Y-4){
-							vida--;
-							if(vida > 0){
-								for(int k=0; k<ne; k++){
-									enemis[k].y = 2 + (k/10);
-									enemis[k].x = 3 + (k%10)*2;
-								}
-							}
+							vida = 0;
 							return;
 						}
 					}
 					
 				}
+					
+					void mde(){
+						for(int i = 0; i < ens; i++){
+							if(edisp[i].act){
+								edisp[i].y++;
+								if(edisp[i].y >= Y-1){
+									edisp[i].act = false;
+								}
+							}
+						}
+					}
+						
+					void initde(){
+						for(int i = 0; i<ens; i++){
+							edisp[i].act = false;
+						}
+					}
+						
+					void hit(){
+						for(int i = 0; i<ens; i++){
+							if(edisp[i].act && edisp[i].x == nave && edisp[i].y == Y-2){
+								vida--;
+								punto -= 150;
+								edisp[i].act = false;
+							}
+						}
+					}
 					
 					bool END(){
 						if(vida == 0) return true;
@@ -229,8 +275,9 @@ void dibujos(){
 							srand(time(0));	
 							
 						inicio();
-						if(init){	
+						if(init){
 							initE();
+							initde();
 							
 							while(!END()){
 								if(kbhit()){
@@ -239,6 +286,23 @@ void dibujos(){
 								}
 								movS();
 								movE();
+								
+								if(rand()%10 == 0){
+									int k = rand() % ne;
+									if(enemis[k].act){
+									for(int i=0; i<ens; i++){
+										if(!edisp[i].act){
+											edisp[i].x = enemis[k].x;
+											edisp[i].y = enemis[k].y +1;
+											edisp[i].act = true;
+											break;
+										}
+									}
+									}
+								}
+
+								mde();
+								hit();
 								
 								dibujos();
 								Sleep(100);
