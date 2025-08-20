@@ -51,18 +51,55 @@ int ens = eshooter;
 int denemi = 1;
 
 void inicio(){
-	cout << "Alumno: Pablo A Aguilar" << endl;
-	cout << "DNI: 42.165.351" << endl;
-	cout << " " << endl;
-	cout << "Acaba con las naves enemigas antes de que lleguen abajo" << endl;
-	cout << " " << endl;
-	cout << "Muevete con 'A' para ir a la izquierda, 'D' para ir a la derecha" << endl;
-	cout << " " << endl;
-	cout << "Dispara con 'BARRA ESPACIADORA'" << endl;
-	cout << " " << endl;
-	cout << "Presiona 'P' para iniciar" << endl;
+
+string text[]{
+"Alumno: Pablo A Aguilar",
+"DNI: 42.165.351",
+" ",
+"Acaba con las naves enemigas antes de que lleguen abajo",
+"Presiona con 'A' para ir a la izquierda",
+"Presiona con 'D' para ir a la derecha",
+"Dispara con 'BARRA ESPACIADORA'",
+" ",
+"Presiona 'P' para iniciar"
+};					
+	int ln = sizeof(text)/sizeof(text[0]);
+
+	int a = 0;
+	for(int i = 0; i < ln; i++){
+	if(text[i].length() > a){
+		a = text[i].length();
+	}
+	}	
+	a += 4;
+
+	for(int i = 0; i < a; i++){
+		cout << "*"; 
+	}
+	cout << endl;
 	
+	for(int i = 0; i < ln; i++){
+		int iz = (a - text[i].length()-2)/2;
+		int dr = a-text[i].length() -2 -iz;
+		
+		cout << "*"; 
+		
+		for(int j = 0; j < iz; j++){
+			cout << " ";
+		}
+		cout << text[i];
+		
+		for(int j = 0; j < dr; j++){
+		cout << " ";
+		}
+		cout << "*" << endl;
+	}
 	
+	for(int i = 0; i < a; i++){
+		cout << "*"; 
+	}
+	cout << endl;
+
 	char tecla;
 	do{
 		tecla = getch();
@@ -72,6 +109,102 @@ void inicio(){
 		init = true;
 }
 
+void ganar(string p){
+	string text[]{
+	"GANASTE",
+	" ",	
+	" ",
+	"PUNTUACION: ",
+	p,
+	" ",
+	"Presiona 'E' para salir",
+	};					
+	int ln = sizeof(text)/sizeof(text[0]);
+	
+	int a = 0;
+	for(int i = 0; i < ln; i++){
+		if(text[i].length() > a){
+			a = text[i].length();
+		}
+	}	
+	a += 4;
+	
+	for(int i = 0; i < a; i++){
+		cout << "*"; 
+	}
+	cout << endl;
+	
+	for(int i = 0; i < ln; i++){
+		int iz = (a - text[i].length()-2)/2;
+		int dr = a-text[i].length() -2 -iz;
+		
+		cout << "*"; 
+		
+		for(int j = 0; j < iz; j++){
+			cout << " ";
+		}
+		cout << text[i];
+		
+		for(int j = 0; j < dr; j++){
+			cout << " ";
+		}
+		cout << "*" << endl;
+	}
+	
+	for(int i = 0; i < a; i++){
+		cout << "*"; 
+	}
+	cout << endl;
+}
+
+void perder(string p){
+		string text[]{
+		"PERDISTE",
+		" ",	
+		" ",
+		"PUNTUACION: ",
+		p,
+		" ",
+		"Presiona 'E' para salir",
+		};					
+		int ln = sizeof(text)/sizeof(text[0]);
+		
+		int a = 0;
+		for(int i = 0; i < ln; i++){
+			if(text[i].length() > a){
+				a = text[i].length();
+			}
+		}	
+		a += 4;
+		
+		for(int i = 0; i < a; i++){
+			cout << "*"; 
+		}
+		cout << endl;
+		
+		for(int i = 0; i < ln; i++){
+			int iz = (a - text[i].length()-2)/2;
+			int dr = a-text[i].length() -2 -iz;
+			
+			cout << "*"; 
+			
+			for(int j = 0; j < iz; j++){
+				cout << " ";
+			}
+			cout << text[i];
+			
+			for(int j = 0; j < dr; j++){
+				cout << " ";
+			}
+			cout << "*" << endl;
+		}
+		
+		for(int i = 0; i < a; i++){
+			cout << "*"; 
+		}
+		cout << endl;
+	}
+		
 void dibujos(){
 	clrscr();
 	
@@ -308,15 +441,13 @@ void dibujos(){
 								Sleep(100);
 							}
 							clrscr();
+							string p = to_string(punto);
 							if(vida == 0){
-								cout << "PERDISTE" << endl;
+								perder(p);
 							}else{
-								cout << "GANASTE" << endl;	
+								ganar(p);
 							}
-							cout << " " << endl;
-							cout << "PUNTUACION: " << punto << endl;
-							cout << " " << endl;
-							cout << "Presiona 'E' para salir" << endl;
+							
 							char tecla;
 							do{
 								tecla = getch();		
