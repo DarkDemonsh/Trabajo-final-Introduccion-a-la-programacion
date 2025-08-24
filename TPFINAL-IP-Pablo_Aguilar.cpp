@@ -4,53 +4,59 @@
 #include <ctime>
 #include <cstdlib>
 using namespace std;
+//------------------------------------------------------------------------------//
+//---------------------------------Variables------------------------------------//
+//------------------------------------------------------------------------------//
+const int eje_X = 50;
+const int eje_Y = 25;
 
-const int X = 50;
-const int Y = 25;
+const int disparos = 500000;
+const int enemigos = 75;
+const int disparos_enemigos = 50;
 
-const int shooter = 500000;
-const int enemir = 75;
-const int eshooter = 50;
+bool iniciar = false;
 
-bool init = false;
+string enemigo_1 = "W";
+string enemigo_2 = "H";
+string enemigo_3 = "M";
 
-string e1 = "W";
-string e2 = "H";
-string e3 = "M";
-
-struct shoot{
+struct disparo{
 	int x; 
 	int y;
-	bool act;
+	bool activo;
 };
 
-struct eshoot{
+struct disparo_enemigo{
 	int x; 
 	int y;
-	bool act;
+	bool activo;
 };
 
-struct enemi{
+struct enemigo{
 	int x; 
 	int y;
 	int type;
-	bool act;
+	bool activo;
 };
 
-int nave = X/2;
+int nave = eje_X/2;
 int vida = 3;
 int punto = 0;
 
-shoot disp[shooter];
-int ns = 0;
-enemi enemis[enemir];
-int ne = 25;
-eshoot edisp[eshooter];
-int ens = eshooter;
+disparo Disparo[disparos];
+int jugador_disparo = 0;
 
-int denemi = 1;
+enemigo Enemigo[enemigos];
+int nave_enemiga = 25;
 
-void inicio(){
+disparo_enemigo DisparoEnemigo[disparos_enemigos];
+int disparo_nave_enemiga = disparos_enemigos;
+
+int Disparo_Enemigo = 1;
+//------------------------------------------------------------------------------//
+//--------------------------Menu de Inicio--------------------------------------//
+//------------------------------------------------------------------------------//
+void Pantalla_Inicial(){
 
 string text[]{
 "Alumno: Pablo A Aguilar",
@@ -63,53 +69,56 @@ string text[]{
 " ",
 "Presiona 'P' para iniciar"
 };					
-	int ln = sizeof(text)/sizeof(text[0]);
+int ln = sizeof(text)/sizeof(text[0]);
 
-	int a = 0;
-	for(int i = 0; i < ln; i++){
+int a = 0;
+for(int i = 0; i < ln; i++){
 	if(text[i].length() > a){
 		a = text[i].length();
 	}
-	}	
-	a += 4;
+}	
+a += 4;
 
-	for(int i = 0; i < a; i++){
-		cout << "*"; 
-	}
-	cout << endl;
+for(int i = 0; i < a; i++){
+	cout << "*"; 
+}
+cout << endl;
+
+for(int i = 0; i < ln; i++){
+	int izquierda = (a - text[i].length()-2)/2;
+	int derecha = a-text[i].length() -2 -izquierda;
 	
-	for(int i = 0; i < ln; i++){
-		int iz = (a - text[i].length()-2)/2;
-		int dr = a-text[i].length() -2 -iz;
-		
-		cout << "*"; 
-		
-		for(int j = 0; j < iz; j++){
-			cout << " ";
-		}
-		cout << text[i];
-		
-		for(int j = 0; j < dr; j++){
+	cout << "*"; 
+	
+	for(int j = 0; j < izquierda; j++){
 		cout << " ";
-		}
-		cout << "*" << endl;
 	}
+	cout << text[i];
 	
-	for(int i = 0; i < a; i++){
-		cout << "*"; 
+	for(int j = 0; j < derecha; j++){
+		cout << " ";
 	}
-	cout << endl;
-
-	char tecla;
-	do{
-		tecla = getch();
-		
-	} while(tecla != 'p');
-	
-		init = true;
+	cout << "*" << endl;
 }
 
-void ganar(string p){
+for(int i = 0; i < a; i++){
+	cout << "*"; 
+}
+cout << endl;
+
+char tecla;
+do{
+	tecla = getch();
+	
+} while(tecla != 'p');
+
+iniciar = true;
+}
+
+//------------------------------------------------------------------------------//
+//-------------------------Pantalla cuando Ganas--------------------------------//
+//------------------------------------------------------------------------------//
+void Pantalla_Ganadora(string p){
 	string text[]{
 	"GANASTE",
 	" ",	
@@ -135,17 +144,17 @@ void ganar(string p){
 	cout << endl;
 	
 	for(int i = 0; i < ln; i++){
-		int iz = (a - text[i].length()-2)/2;
-		int dr = a-text[i].length() -2 -iz;
+		int izquierda = (a - text[i].length()-2)/2;
+		int derecha = a-text[i].length() -2 -izquierda;
 		
 		cout << "*"; 
 		
-		for(int j = 0; j < iz; j++){
+		for(int j = 0; j < izquierda; j++){
 			cout << " ";
 		}
 		cout << text[i];
 		
-		for(int j = 0; j < dr; j++){
+		for(int j = 0; j < derecha; j++){
 			cout << " ";
 		}
 		cout << "*" << endl;
@@ -157,114 +166,120 @@ void ganar(string p){
 	cout << endl;
 }
 
-void perder(string p){
-		string text[]{
+//------------------------------------------------------------------------------//
+//------------------------Pantalla cuando Pierdes-------------------------------//
+//------------------------------------------------------------------------------//
+void Pantalla_Perdedora(string p){
+	string text[]{
 		"PERDISTE",
-		" ",	
-		" ",
-		"PUNTUACION: ",
-		p,
-		" ",
-		"Presiona 'E' para salir",
-		};					
-		int ln = sizeof(text)/sizeof(text[0]);
-		
-		int a = 0;
-		for(int i = 0; i < ln; i++){
-			if(text[i].length() > a){
-				a = text[i].length();
-			}
-		}	
-		a += 4;
-		
-		for(int i = 0; i < a; i++){
-			cout << "*"; 
+			" ",	
+			" ",
+			"PUNTUACION: ",
+			p,
+			" ",
+			"Presiona 'E' para salir",
+	};					
+	int ln = sizeof(text)/sizeof(text[0]);
+	
+	int a = 0;
+	for(int i = 0; i < ln; i++){
+		if(text[i].length() > a){
+			a = text[i].length();
 		}
-		cout << endl;
-		
-		for(int i = 0; i < ln; i++){
-			int iz = (a - text[i].length()-2)/2;
-			int dr = a-text[i].length() -2 -iz;
-			
-			cout << "*"; 
-			
-			for(int j = 0; j < iz; j++){
-				cout << " ";
-			}
-			cout << text[i];
-			
-			for(int j = 0; j < dr; j++){
-				cout << " ";
-			}
-			cout << "*" << endl;
-		}
-		
-		for(int i = 0; i < a; i++){
-			cout << "*"; 
-		}
-		cout << endl;
+	}	
+	a += 4;
+	
+	for(int i = 0; i < a; i++){
+		cout << "*"; 
 	}
+	cout << endl;
+	
+	for(int i = 0; i < ln; i++){
+		int izquierda = (a - text[i].length()-2)/2;
+		int derecha = a-text[i].length() -2 -izquierda;
 		
+		cout << "*"; 
+		
+		for(int j = 0; j < izquierda; j++){
+			cout << " ";
+		}
+		cout << text[i];
+		
+		for(int j = 0; j < derecha; j++){
+			cout << " ";
+		}
+		cout << "*" << endl;
+	}
+	
+	for(int i = 0; i < a; i++){
+		cout << "*"; 
+	}
+	cout << endl;
+}
+	
+//------------------------------------------------------------------------------//
+//-------------------------Clase que inicia los dibujos-------------------------//
+//------------------------------------------------------------------------------//
 void dibujos(){
 	clrscr();
 	
-	for(int i = 0; i < Y; i++){
-		for(int j = 0 ; j < X; j++){
-			bool borde = (i==0 || i == Y-1 || j == 0 || j == X-1 );
-			bool show = false;
+	for(int i = 0; i < eje_Y; i++){
+		for(int j = 0 ; j < eje_X; j++){
+			bool borde = (i==0 || i == eje_Y-1 || j == 0 || j == eje_X-1 );
+			bool mostrar = false;
 			
 			if(borde){
 				cout << "*";
-				show = true;
+				mostrar = true;
 			}
-			if(!show){
-				for(int k=0; k<ns; k++){
-					if(disp[k].act && disp[k].x==j && disp[k].y==i){
+			if(!mostrar){
+				for(int k=0; k<jugador_disparo; k++){
+					if(Disparo[k].activo && Disparo[k].x==j && Disparo[k].y==i){
 						textcolor(GREEN);
 						cprintf("|");
 						textcolor(WHITE);
-						show = true;
+						mostrar = true;
 						break;
 					}
 				}
 			}
-			if(!show){
-				for(int k=0; k<ens; k++){
-					if(edisp[k].act && edisp[k].x==j && edisp[k].y==i){
+			if(!mostrar){
+				for(int k=0; k<disparo_nave_enemiga; k++){
+					if(DisparoEnemigo[k].activo && DisparoEnemigo[k].x==j && DisparoEnemigo[k].y==i){
 						textcolor(RED);
 						cprintf("v");
 						textcolor(WHITE);
-						show = true;
+						mostrar = true;
 						break;
 					}
 				}
 			}
 			
-			if(!show){
-				for(int k=0; k<ne; k++){
-					if(enemis[k].act && enemis[k].x==j && enemis[k].y==i-2){
+			if(!mostrar){
+				for(int k=0; k<nave_enemiga; k++){
+					if(Enemigo[k].activo && Enemigo[k].x==j && Enemigo[k].y==i-2){
 						textcolor(RED);
-						if(enemis[k].type == 3) cout <<e3;
+						if(Enemigo[k].type == 3) cout <<enemigo_3;
 						textcolor(LIGHTRED);
-						if(enemis[k].type == 2) cout <<e2;
+						if(Enemigo[k].type == 2) cout <<enemigo_2;
 						textcolor(YELLOW);
-						if(enemis[k].type == 1) cout <<e1;
+						if(Enemigo[k].type == 1) cout <<enemigo_1;
 						textcolor(WHITE);
-						show = true;
+						mostrar = true;
 						break;
 					}
 				}
 			}
-
-			if(!show){
-				if(i==Y-2 && j==nave){
+			
+			if(!mostrar){
+				if(i==eje_Y-2 && j==nave){
 					textcolor(BLUE);
 					cprintf("A");
 					textcolor(WHITE);
-					show = true;
+					mostrar = true;
 				}
 			}
-			if(!show)
+			if(!mostrar)
 			   cout << " ";
 		}
 		cout << endl;
@@ -272,187 +287,214 @@ void dibujos(){
 	cout << "Vidas: " << vida << " Puntos: " << punto << endl;
 }
 	
-	void initE(){
-		ne = 0;
-			for(int j=4; j<X-15 ; j+=3){
-				enemis[ne].x = j;
-				enemis[ne].y = 1;
-				enemis[ne].act = true;
-				enemis[ne].type = 3;
-				ne++;
-			}
-			for(int j=4; j<X-15 ; j+=3){
-				enemis[ne].x = j;
-				enemis[ne].y = 2;
-				enemis[ne].act = true;
-				enemis[ne].type = 2;
-				ne++;
-			}
-			for(int j=4; j<X-15 ; j+=3){
-				enemis[ne].x = j;
-				enemis[ne].y = 3;
-				enemis[ne].act = true;
-				enemis[ne].type = 1;
-				ne++;
-			}
-		}
-		
-		
-		void movN(char tecla){
-			if(tecla=='a' && nave>1) nave--;
-			if(tecla=='d' && nave<X-2) nave++;
-			if(tecla==' ' && ns < shooter){
-				disp[ns].x = nave;
-				disp[ns].y = Y-3;
-				disp[ns].act = true;
-				ns++;
-			}
-		}
+//------------------------------------------------------------------------------//
+//-------------------------Clase que inicia a los enemigos----------------------//
+//------------------------------------------------------------------------------//
+void Iniciar_Enemigos(){
+	nave_enemiga = 0;
+	for(int j=4; j<eje_X-15 ; j+=3){
+		Enemigo[nave_enemiga].x = j;
+		Enemigo[nave_enemiga].y = 1;
+		Enemigo[nave_enemiga].activo = true;
+		Enemigo[nave_enemiga].type = 3;
+		nave_enemiga++;
+	}
+	for(int j=4; j<eje_X-15 ; j+=3){
+		Enemigo[nave_enemiga].x = j;
+		Enemigo[nave_enemiga].y = 2;
+		Enemigo[nave_enemiga].activo = true;
+		Enemigo[nave_enemiga].type = 2;
+		nave_enemiga++;
+	}
+	for(int j=4; j<eje_X-15 ; j+=3){
+		Enemigo[nave_enemiga].x = j;
+		Enemigo[nave_enemiga].y = 3;
+		Enemigo[nave_enemiga].activo = true;
+		Enemigo[nave_enemiga].type = 1;
+		nave_enemiga++;
+	}
+}
+	
+	
+//------------------------------------------------------------------------------//
+//-------------------------Clase que mueve al jugador---------------------------//
+//------------------------------------------------------------------------------//
+void Mover_Jugador(char tecla){
+	if(tecla=='a' && nave>1) nave--;
+	if(tecla=='d' && nave<eje_X-2) nave++;
+	if(tecla==' ' && jugador_disparo < disparos){
+		Disparo[jugador_disparo].x = nave;
+		Disparo[jugador_disparo].y = eje_Y-3;
+		Disparo[jugador_disparo].activo = true;
+		jugador_disparo++;
+	}
+}
+	
+//------------------------------------------------------------------------------//
+//--------------Clase que mueve los disparos del jugado-------------------------//
+//------------------------------------------------------------------------------//
+void Mover_Disparos(){
+	for(int k=0; k<jugador_disparo; k++){
+		if(Disparo[k].activo){
+			Disparo[k].y--;
+			if(Disparo[k].y<=0) Disparo[k].activo = false;
 			
-			void movS(){
-				for(int k=0; k<ns; k++){
-					if(disp[k].act){
-						disp[k].y--;
-						if(disp[k].y<=0) disp[k].act = false;
-						
-						for(int m=0; m < ne; m++){
-							if(enemis[m].act && enemis[m].x==disp[k].x && enemis[m].y==disp[k].y ){
-								enemis[m].act = false;
-								disp[k].act = false;
-								
-								if(enemis[m].type == 1){
-									punto += 100;
-								}
-								if(enemis[m].type == 2){
-									punto += 200;
-								}
-								if(enemis[m].type == 3){
-									punto += 300;
-								}
-								
-							}
+			for(int m=0; m < nave_enemiga; m++){
+				if(Enemigo[m].activo && Enemigo[m].x==Disparo[k].x && Enemigo[m].y==Disparo[k].y ){
+					Enemigo[m].activo = false;
+					Disparo[k].activo = false;
+					
+					if(Enemigo[m].type == 1){
+						punto += 100;
+					}
+					if(Enemigo[m].type == 2){
+						punto += 200;
+					}
+					if(Enemigo[m].type == 3){
+						punto += 300;
+					}
+					
+				}
+			}
+		}
+	}
+}
+	
+//------------------------------------------------------------------------------//
+//------------------Clase que mueve a los enemigos------------------------------//
+//------------------------------------------------------------------------------//
+void Mover_Enemigos(){
+	int minX = eje_X, maxX=0;
+	for(int k=0; k<nave_enemiga; k++){
+		if(Enemigo[k].activo){
+			if(Enemigo[k].x<minX) minX = Enemigo[k].x;
+			if(Enemigo[k].x>maxX) maxX = Enemigo[k].x;
+		}
+	}
+	
+	if(maxX+Disparo_Enemigo >= eje_X-1 || minX+Disparo_Enemigo <= 1){
+		Disparo_Enemigo *= -1;
+		for(int k=0; k<nave_enemiga; k++){
+			if(Enemigo[k].activo) Enemigo[k].y++;
+		}
+	}
+	
+	for(int k=0; k<nave_enemiga; k++){
+		if(Enemigo[k].activo) Enemigo[k].x += Disparo_Enemigo;
+	}
+	
+	for(int k=0; k<nave_enemiga; k++){
+		if(Enemigo[k].activo && Enemigo[k].y >= eje_Y-4){
+			vida = 0;
+			return;
+		}
+	}
+	
+}
+	
+//------------------------------------------------------------------------------//
+//---------------------Clase que mueve los disparos enemigos--------------------//
+//------------------------------------------------------------------------------//
+void Mover_Disparos_Enemigos(){
+	for(int i = 0; i < disparo_nave_enemiga; i++){
+		if(DisparoEnemigo[i].activo){
+			DisparoEnemigo[i].y++;
+			if(DisparoEnemigo[i].y >= eje_Y-1){
+				DisparoEnemigo[i].activo = false;
+			}
+		}
+	}
+}
+	
+//------------------------------------------------------------------------------//
+//----------------------Clase que inicia los disparos enemigos------------------//
+//------------------------------------------------------------------------------//
+void Iniciar_Disparos_Enemigos(){
+	for(int i = 0; i<disparo_nave_enemiga; i++){
+		DisparoEnemigo[i].activo = false;
+	}
+}
+	
+//------------------------------------------------------------------------------//
+//--------------------------Clase que controla las colisiones-------------------//
+//------------------------------------------------------------------------------//
+void Colisiones(){
+	for(int i = 0; i<disparo_nave_enemiga; i++){
+		if(DisparoEnemigo[i].activo && DisparoEnemigo[i].x == nave && DisparoEnemigo[i].y == eje_Y-2){
+			vida--;
+			punto -= 150;
+			DisparoEnemigo[i].activo = false;
+		}
+	}
+}
+	
+//------------------------------------------------------------------------------//
+//----------------------------Clase que controla el fin del juego---------------//
+//------------------------------------------------------------------------------//
+bool Fin_del_Juego(){
+	if(vida == 0) return true;
+	bool hayVivos = false;
+	for(int k=0; k<nave_enemiga; k++){
+		if(Enemigo[k].activo){
+			hayVivos = true;
+			break;
+		}
+	}
+	return !hayVivos;
+}
+	
+//------------------------------------------------------------------------------//
+//------------------------Clase que inicia todas las clases---------------------//
+//------------------------------------------------------------------------------//
+int main() {
+	srand(time(0));	
+	
+	Pantalla_Inicial();
+	if(iniciar){
+		Iniciar_Enemigos();
+		Iniciar_Disparos_Enemigos();
+		
+		while(!Fin_del_Juego()){
+			if(kbhit()){
+				char tecla = getch();
+				Mover_Jugador(tecla);
+			}
+			Mover_Disparos();
+			Mover_Enemigos();
+			
+			if(rand()%10 == 0){
+				int k = rand() % nave_enemiga;
+				if(Enemigo[k].activo){
+					for(int i=0; i<disparo_nave_enemiga; i++){
+						if(!DisparoEnemigo[i].activo){
+							DisparoEnemigo[i].x = Enemigo[k].x;
+							DisparoEnemigo[i].y = Enemigo[k].y +1;
+							DisparoEnemigo[i].activo = true;
+							break;
 						}
 					}
 				}
 			}
-				
-				void movE(){
-					int minX = X, maxX=0;
-					for(int k=0; k<ne; k++){
-						if(enemis[k].act){
-							if(enemis[k].x<minX) minX = enemis[k].x;
-							if(enemis[k].x>maxX) maxX = enemis[k].x;
-						}
-					}
-					
-					if(maxX+denemi >= X-1 || minX+denemi <= 1){
-						denemi *= -1;
-						for(int k=0; k<ne; k++){
-							if(enemis[k].act) enemis[k].y++;
-						}
-					}
-					
-					for(int k=0; k<ne; k++){
-						if(enemis[k].act) enemis[k].x += denemi;
-					}
-					
-					for(int k=0; k<ne; k++){
-						if(enemis[k].act && enemis[k].y >= Y-4){
-							vida = 0;
-							return;
-						}
-					}
-					
-				}
-					
-					void mde(){
-						for(int i = 0; i < ens; i++){
-							if(edisp[i].act){
-								edisp[i].y++;
-								if(edisp[i].y >= Y-1){
-									edisp[i].act = false;
-								}
-							}
-						}
-					}
-						
-					void initde(){
-						for(int i = 0; i<ens; i++){
-							edisp[i].act = false;
-						}
-					}
-						
-					void hit(){
-						for(int i = 0; i<ens; i++){
-							if(edisp[i].act && edisp[i].x == nave && edisp[i].y == Y-2){
-								vida--;
-								punto -= 150;
-								edisp[i].act = false;
-							}
-						}
-					}
-					
-					bool END(){
-						if(vida == 0) return true;
-						bool hayVivos = false;
-						for(int k=0; k<ne; k++){
-							if(enemis[k].act){
-								hayVivos = true;
-								break;
-							}
-						}
-						return !hayVivos;
-					}
-						
-						int main() {
-							srand(time(0));	
-							
-						inicio();
-						if(init){
-							initE();
-							initde();
-							
-							while(!END()){
-								if(kbhit()){
-									char tecla = getch();
-									movN(tecla);
-								}
-								movS();
-								movE();
-								
-								if(rand()%10 == 0){
-									int k = rand() % ne;
-									if(enemis[k].act){
-									for(int i=0; i<ens; i++){
-										if(!edisp[i].act){
-											edisp[i].x = enemis[k].x;
-											edisp[i].y = enemis[k].y +1;
-											edisp[i].act = true;
-											break;
-										}
-									}
-									}
-								}
-
-								mde();
-								hit();
-								
-								dibujos();
-								Sleep(100);
-							}
-							clrscr();
-							string p = to_string(punto);
-							if(vida == 0){
-								perder(p);
-							}else{
-								ganar(p);
-							}
-							
-							char tecla;
-							do{
-								tecla = getch();		
-							} while(tecla != 'e');
-							
-						}
-						return 0;
-						}	
+			
+			Mover_Disparos_Enemigos();
+			Colisiones();
+			
+			dibujos();
+			Sleep(100);
+		}
+		
+		string p = to_string(punto);
+		if(vida == 0){
+			Pantalla_Perdedora(p);
+		}else{
+			Pantalla_Ganadora(p);
+		}
+		
+		char tecla;
+		do{
+			tecla = getch();		
+		} while(tecla != 'e');
+		
+	}
+	return 0;
+}	
